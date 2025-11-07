@@ -1,1 +1,327 @@
+“Give me a map design that is a map for a multi floor layered tower where each floor can rotate independently from the others or together if they need to”
 
+// on each floor
+public class FloorController : MonoBehaviour
+{
+    public int orientationIndex; // 0,1,2,3
+    public int groupId = -1;     // -1=independent
+    public event System.Action<int> OnRotated; // passes new orientationIndex
+
+    public void RotateCW() { SetOrientation((orientationIndex + 1) & 3); }
+    public void RotateCCW() { SetOrientation((orientationIndex + 3) & 3); }
+
+    public void SetOrientation(int idx)
+    {
+        orientationIndex = idx & 3;
+        // rotate visual to 0/90/180/270
+        transform.localRotation = Quaternion.Euler(0, 90f * orientationIndex, 0);
+        OnRotated?.Invoke(orientationIndex);
+    }
+}
+// central conduit logic (very light pseudo)
+public class ConduitGraph : MonoBehaviour
+{
+    // for each F, which cardinals are “open”
+    public bool IsSocketAligned(int floor, Vector2Int cardinalIndex) { /* check floor orientation */ return true; }
+
+    public bool IsVerticalPathPowered(string from, string to) { /* evaluate; consider diodes/caps */ return true; }
+
+    public event System.Action OnConduitChanged;
+
+    public void NotifyFloorChanged() => OnConduitChanged?.Invoke();
+}
+
+“Create me a simple character moving script that only moves with wasd no jumping or anything else fancy. Make it physics based and make sure it doesn't clip on anything like walls or floors”
+
+using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody))]
+public class MoveWithPhysics : MonoBehaviour
+{
+    public float moveSpeed = 5f;
+
+    Rigidbody rb;
+    Vector3 moveInput;
+    Vector3 moveVelocity;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+    }
+
+    void Update()
+    {
+        float h = Input.GetAxisRaw("Horizontal"); // A D
+        float v = Input.GetAxisRaw("Vertical");   // W S
+
+        // movement direction based on player forward/right
+        moveInput = (transform.forward * v + transform.right * h).normalized;
+        moveVelocity = moveInput * moveSpeed;
+    }
+
+    void FixedUpdate()
+    {
+        // keeps physics consistent
+        rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
+    }
+}
+
+can you make a script of multiple scripts that moves a tower seperated into 3 seperate parts, being able to rotate each level when selected. So if multiple are selected then multiple floors should rotate 90 degrees
+
+using UnityEngine;
+using System.Collections;
+
+[DisallowMultipleComponent]
+public class FloorRotator : MonoBehaviour
+{
+    [Header("Rotation")]
+    [Tooltip("Degrees per step (use 90 for quarter-turn).")]
+    public float stepAngle = 90f;
+    [Tooltip("Degrees per second while rotating.")]
+    public float rotationSpeed = 180f;
+    [Tooltip("Rotate around this local axis (default Y).")]
+    public Vector3 localAxis = Vector3.up;
+
+    private bool _isRotating = false;
+    private int _queuedSteps = 0; // positive = clockwise, negative = counter
+    private Quaternion _startRot, _targetRot;
+
+    public bool IsBusy => _isRotating;
+
+    /// <summary>Queue one step (direction 1 or -1).</summary>
+    public void QueueRotate(int direction = 1)
+    {
+        if (direction == 0) return;
+        _queuedSteps += Mathf.Clamp(direction, -1, 1);
+        if (!_isRotating) StartCoroutine(RunQueue());
+    }
+
+    /// <summary>Queue N steps (positive or negative).</summary>
+    public void QueueRotateSteps(int steps)
+    {
+        if (steps == 0) return;
+        _queuedSteps += steps;
+        if (!_isRotating) StartCoroutine(RunQueue());
+    }
+
+    private IEnumerator RunQueue()
+    {
+        _isRotating = true;
+
+        while (_queuedSteps != 0)
+        {
+            int dir = _queuedSteps > 0 ? 1 : -1;
+            _queuedSteps -= dir;
+
+            _startRot = transform.localRotation;
+
+            // Build target by a step about the local axis.
+            Vector3 axisWorld = transform.TransformDirection(localAxis.normalized);
+            _targetRot = Quaternion.AngleAxis(dir * stepAngle, axisWorld) * _startRot;
+
+            // Smoothly turn until we reach target
+            float remaining = stepAngle;
+            while (remaining > 0f)
+            {
+                float step = rotationSpeed * Time.deltaTime;
+                float delta = Mathf.Min(step, remaining);
+
+                // incremental apply around the same axis for stability
+                transform.Rotate(localAxis.normalized, dir * delta, Space.Self);
+                remaining -= delta;
+
+                yield return null;
+            }
+
+            // Snap to exact target to avoid drift
+            transform.localRotation = _targetRot;
+        }
+
+        _isRotating = false;
+    }
+}
+
+using UnityEngine;
+
+[DisallowMultipleComponent]
+public class Selectable : MonoBehaviour
+{
+    [Header("Highlight")]
+    public bool isSelected = false;
+    [Tooltip("Added to the current base color when selected.")]
+    public Color selectionTint = new Color(0.15f, 0.35f, 0.6f, 0f);
+
+    private Renderer[] _renderers;
+    private MaterialPropertyBlock _mpb;
+
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
+    private void Awake()
+    {
+        _renderers = GetComponentsInChildren<Renderer>(true);
+        _mpb = new MaterialPropertyBlock();
+        UpdateHighlight();
+    }
+
+    public void SetSelected(bool value)
+    {
+        if (isSelected == value) return;
+        isSelected = value;
+        UpdateHighlight();
+    }
+
+    public void ToggleSelected()
+    {
+        isSelected = !isSelected;
+        UpdateHighlight();
+    }
+
+    private void UpdateHighlight()
+    {
+        foreach (var r in _renderers)
+        {
+            // Read current base color (fallback to white)
+            Color baseCol = Color.white;
+            r.GetPropertyBlock(_mpb);
+            if (_mpb.GetVector(BaseColorId) is Vector4 v)
+                baseCol = (Color)v;
+
+            Color final = isSelected ? (baseCol + selectionTint) : baseCol;
+
+            _mpb.SetColor(BaseColorId, final);
+            r.SetPropertyBlock(_mpb);
+        }
+    }
+}
+
+using UnityEngine;
+using System.Collections.Generic;
+
+public class SelectionManager : MonoBehaviour
+{
+    public static SelectionManager Instance { get; private set; }
+
+    [Header("Picking")]
+    public Camera sceneCamera;
+    public LayerMask selectableMask = ~0; // everything by default
+    [Tooltip("If true, clicking an already selected object leaves others selected.")]
+    public bool toggleMode = true;
+
+    private readonly HashSet<Selectable> _selected = new();
+
+    public IReadOnlyCollection<Selectable> CurrentSelection => _selected;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+
+        if (sceneCamera == null) sceneCamera = Camera.main;
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleClick();
+        }
+    }
+
+    private void HandleClick()
+    {
+        Ray ray = sceneCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out var hit, 1000f, selectableMask))
+        {
+            var sel = hit.collider.GetComponentInParent<Selectable>();
+            if (sel != null)
+            {
+                if (!toggleMode && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
+                {
+                    ClearSelection();
+                }
+
+                if (_selected.Contains(sel))
+                {
+                    // toggle off
+                    sel.SetSelected(false);
+                    _selected.Remove(sel);
+                }
+                else
+                {
+                    // toggle on
+                    sel.SetSelected(true);
+                    _selected.Add(sel);
+                }
+                return;
+            }
+        }
+
+        // Clicked empty space
+        bool keepWhenAlt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+        if (!keepWhenAlt) ClearSelection();
+    }
+
+    public void ClearSelection()
+    {
+        foreach (var s in _selected) s.SetSelected(false);
+        _selected.Clear();
+    }
+}
+
+using UnityEngine;
+
+public class TowerController : MonoBehaviour
+{
+    [Header("Move Whole Tower (optional)")]
+    public bool allowMove = true;
+    public float moveSpeed = 5f;
+    public float yawSpeed = 90f;
+
+    [Header("Rotation Controls")]
+    [Tooltip("Key to rotate +90° (clockwise).")]
+    public KeyCode rotateCWKey = KeyCode.R;
+    [Tooltip("Key to rotate -90° (counter-clockwise).")]
+    public KeyCode rotateCCWKey = KeyCode.F;
+
+    private void Update()
+    {
+        HandleRotateInputs();
+        if (allowMove) HandleMovement();
+    }
+
+    private void HandleRotateInputs()
+    {
+        if (SelectionManager.Instance == null) return;
+
+        if (Input.GetKeyDown(rotateCWKey))
+            RotateSelected(+1);
+
+        if (Input.GetKeyDown(rotateCCWKey))
+            RotateSelected(-1);
+    }
+
+    private void RotateSelected(int dir)
+    {
+        foreach (var sel in SelectionManager.Instance.CurrentSelection)
+        {
+            var rot = sel.GetComponent<FloorRotator>();
+            if (rot != null)
+                rot.QueueRotate(dir);
+        }
+    }
+
+    private void HandleMovement()
+    {
+        float h = Input.GetAxisRaw("Horizontal"); // A/D
+        float v = Input.GetAxisRaw("Vertical");   // W/S
+        float q = 0f;
+        if (Input.GetKey(KeyCode.Q)) q -= 1f;
+        if (Input.GetKey(KeyCode.E)) q += 1f;
+
+        Vector3 move = new Vector3(h, 0f, v).normalized * moveSpeed * Time.deltaTime;
+        transform.Translate(move, Space.World);
+
+        transform.Rotate(Vector3.up, q * yawSpeed * Time.deltaTime, Space.World);
+    }
+}
