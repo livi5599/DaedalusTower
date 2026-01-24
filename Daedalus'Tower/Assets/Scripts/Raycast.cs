@@ -17,6 +17,7 @@ public class Raycast : MonoBehaviour
 
     void Start()
     {
+        //Set waterBaseHeight
         waterBaseHeight = WaterLevel.transform.position.y;
     }
 
@@ -68,3 +69,4 @@ public class Raycast : MonoBehaviour
         Debug.DrawRay(origin, direction * lineLength, Color.blue);
     }
 }
+
