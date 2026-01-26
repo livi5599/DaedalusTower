@@ -26,7 +26,7 @@ public class Raycast : MonoBehaviour
         //Ray starting point
         Vector3 origin = transform.position; //sets origin to the position (middle) of the object this script is attached to (the sphere)
         //Ray direction
-        Vector3 direction = transform.forward; //sets direction to the z-axis (better than .up, because if the sphere rotates, the ray will rotate with it)
+        Vector3 direction = -transform.up; //sets direction to the z-axis (better than .up, because if the sphere rotates, the ray will rotate with it)
 
         //Container that stores hit info
         RaycastHit hitInfo;
@@ -51,7 +51,7 @@ public class Raycast : MonoBehaviour
                     //Drain the water
                     WaterLevel.transform.position -= Vector3.up * drainSpeed * Time.deltaTime;
                 }
-            }
+            }   
         }
         else
         {
