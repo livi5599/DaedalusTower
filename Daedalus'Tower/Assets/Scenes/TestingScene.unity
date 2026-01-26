@@ -1349,15 +1349,15 @@ RectTransform:
   m_GameObject: {fileID: 1100983805}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.18, y: 0.18, z: 0.18}
+  m_LocalScale: {x: 2.5493133, y: 2.5493133, z: 2.5493133}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 918410767}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -173, y: 98}
-  m_SizeDelta: {x: 1920, y: 1080}
+  m_AnchoredPosition: {x: -166, y: 98}
+  m_SizeDelta: {x: 128, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1100983807
 MonoBehaviour:
@@ -1518,7 +1518,7 @@ GameObject:
   - component: {fileID: 1386258696}
   - component: {fileID: 1386258695}
   - component: {fileID: 1386258694}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2211,7 +2211,7 @@ GameObject:
   - component: {fileID: 1775896145}
   - component: {fileID: 1775896144}
   - component: {fileID: 1775896143}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
