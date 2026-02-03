@@ -14,11 +14,19 @@ public class DrainPoint : MonoBehaviour
     float lineLength;
     //Base/default height of water
     public float waterBaseHeight; 
+    public float maxWaterHeight;
+    public bool isFlowing = false;
+
+    public ParticleSystem waterFalling;
+
+    LineRenderer line;
 
     void Start()
     {
+        waterFalling.Stop();
         //Set waterBaseHeight
         waterBaseHeight = WaterLevel.transform.position.y;
+        line = GetComponent<LineRenderer>();
     }
 
     void Update()
@@ -31,20 +39,33 @@ public class DrainPoint : MonoBehaviour
         //Container that stores hit info
         RaycastHit hitInfo;
 
+        //Naive line renderer positioning
+        line.SetPosition(0,transform.position);
+        line.SetPosition(1,transform.position);
+
         //Fire raycast
         if (Physics.Raycast(origin, direction, out hitInfo, maxDist)) //returns true if hit, false if miss
         {
             //Set the raycast line length
             lineLength = hitInfo.distance;
+            line.SetPosition(1,transform.position - Vector3.up*lineLength);
 
             //If the ray collides with the "Water" object and the height of the object is not higher than 2.5...
-            if (hitInfo.collider.CompareTag("Water") && hitInfo.collider.transform.position.y <= 2.5f)
+            if (hitInfo.collider.CompareTag("Water") && hitInfo.collider.transform.position.y <= maxWaterHeight)
             {
+                if(!isFlowing) {
+                    isFlowing = true;
+                    waterFalling.Play();
+                }
                 //Raise the "Water"
                 hitInfo.collider.transform.position += Vector3.up * fillSpeed * Time.deltaTime;
+                
+                
             }
             else
             {
+                waterFalling.Stop();
+                isFlowing = false;
                 //If the water level is higher than the base height...
                 if (WaterLevel.transform.position.y > waterBaseHeight)
                 {
