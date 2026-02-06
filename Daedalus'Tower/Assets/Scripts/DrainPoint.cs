@@ -19,7 +19,7 @@ public class DrainPoint : MonoBehaviour
 
     public ParticleSystem waterFalling;
 
-    LineRenderer line;
+    [SerializeField] LineRenderer line;
 
     void Start()
     {
