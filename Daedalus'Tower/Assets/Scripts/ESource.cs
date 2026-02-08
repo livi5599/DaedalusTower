@@ -24,7 +24,7 @@ public class ESource : MonoBehaviour
         //Ray starting point
         Vector3 origin = transform.position; //sets origin to the position (middle) of the source of the ray
         //Ray direction
-        Vector3 direction = transform.up;
+        Vector3 direction = transform.right;
 
         //Fire the ray
         if (Physics.Raycast(origin, direction, out hitInfo, maxDist)) //returns true if hit, false if miss
@@ -39,7 +39,7 @@ public class ESource : MonoBehaviour
             if (hitInfo.collider.CompareTag("Gem"))
             {
                 //Store the hit gem
-                Gem1 hitGem = hitInfo.collider.GetComponent<Gem1>();
+                EConductor hitGem = hitInfo.collider.GetComponent<EConductor>();
 
                 if (hitGem != null)
                 {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Gem1 : MonoBehaviour
+public class EConductor : MonoBehaviour
 {
     //Maximum distance the ray can travel
     public float maxDist = 10f;
@@ -13,14 +13,11 @@ public class Gem1 : MonoBehaviour
     //Used to store the renderer attached to this gem
     Renderer renderer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //Sets the renderer
-        renderer = GetComponent<Renderer>();
+        renderer = GetComponentInChildren<Renderer>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (isActive) //if the gem is active...
@@ -45,7 +42,7 @@ public class Gem1 : MonoBehaviour
                 LineRenderer nodeLine = node.GetComponent<LineRenderer>();
 
                 //If the node line is enabled, disable it to prevent it from being enabled when not active
-                if (nodeLine != null) nodeLine.enabled = false;
+                if (node != null) nodeLine.enabled = false;
             }
         }
 
@@ -88,7 +85,7 @@ public class Gem1 : MonoBehaviour
             //Gets the raycast line for each reflecting node
             LineRenderer nodeLine = node.GetComponent<LineRenderer>();
 
-            if (nodeLine != hitNode) //If the node is not the node that was hit...
+            if (node != hitNode) //If the node is not the node that was hit...
             {
                 //Enable the node line
                 if (node != null) nodeLine.enabled = true;
@@ -96,7 +93,12 @@ public class Gem1 : MonoBehaviour
                 //Get the origin from where the ray will be reflected
                 Vector3 origin = node.position;
                 //Sets the direction of the ray so it is opposite the node origin
-                Vector3 direction = (node.position - transform.position).normalized; //using "normalized" makes the vector a unit vector
+                Vector3 direction = (node.position - transform.position);
+
+                //Keeps the ray horizontal
+                direction.y = 0;
+
+                direction = direction.normalized; //using "normalized" makes the vector a unit vector
 
                 //Fire the ray
                 if (Physics.Raycast(origin, direction, out hitInfo, maxDist)) //returns true if hit, false if miss
@@ -109,7 +111,7 @@ public class Gem1 : MonoBehaviour
                     if (hitInfo.collider.CompareTag("Gem")) //If the ray hit a gem...
                     {
                         //Store the hit gem
-                        Gem1 hitGem = hitInfo.collider.GetComponent<Gem1>();
+                        EConductor hitGem = hitInfo.collider.GetComponent<EConductor>();
 
                         if (hitGem != null)
                         {
@@ -121,7 +123,7 @@ public class Gem1 : MonoBehaviour
                 else //Ray hit nothing
                 {
                     //Enable the node line
-                    if (nodeLine != null) nodeLine.enabled = true;
+                    if (node != null) nodeLine.enabled = true;
 
                     nodeLine.SetPosition(0, origin);
                     nodeLine.SetPosition(1, origin + (direction * maxDist));
