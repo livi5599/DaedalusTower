@@ -13,6 +13,7 @@ public class TowerController : MonoBehaviour
         sectionIsRotating = new bool[towerSections.Length];
     }
 
+
     // Update is called once per frame
     void Update()
     {
