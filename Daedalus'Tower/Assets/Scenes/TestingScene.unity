@@ -2590,8 +2590,8 @@ MonoBehaviour:
   maxWaterHeight: 0
   waterBaseHeight: 0
   isFilling: 0
-  drainSpeed: 0.1
-  fillSpeed: 0.1
+  drainSpeed: 0.2
+  fillSpeed: 0.5
 --- !u!1 &867151501
 GameObject:
   m_ObjectHideFlags: 0
@@ -6709,6 +6709,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WaterSource (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 9018496829640955897, guid: e09bc3f1681496c40b453fdcc0ed5b43, type: 3}
+      propertyPath: hittingWater
+      value: 
+      objectReference: {fileID: 807615249}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

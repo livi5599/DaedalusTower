@@ -13,19 +13,26 @@ public class Water : MonoBehaviour
     void Start()
     {
         waterBaseHeight = transform.position.y;
+        maxWaterHeight = waterBaseHeight + 5;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (transform.position.y > waterBaseHeight)
-                {
-                    //Drain the water
-                    transform.position -= Vector3.up * drainSpeed * Time.deltaTime;
-                }
+        if (isFilling)
+        {
+            if(transform.position.y < maxWaterHeight)
+            {
+                transform.position += Vector3.up * fillSpeed * Time.deltaTime;
+            }
+        } 
         else
         {
-            transform.position += Vector3.up * fillSpeed * Time.deltaTime;
+            if(transform.position.y > waterBaseHeight)
+            {
+                transform.position -= Vector3.up * drainSpeed * Time.deltaTime;
+            }
         }
+        
     }
 }

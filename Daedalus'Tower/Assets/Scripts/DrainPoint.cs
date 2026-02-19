@@ -69,6 +69,7 @@ public class DrainPoint : MonoBehaviour
             if (hitInfo.collider.CompareTag("Water"))// && hitInfo.collider.transform.position.y <= maxWaterHeight)
             {
                 isFlowing = true;
+                hittingWater = hitInfo.transform.GetComponentInChildren<Water>();
                 hittingWater.isFilling = true;
                 isFillingWaterSource = true;
                 //Raise the "Water"   
@@ -78,13 +79,8 @@ public class DrainPoint : MonoBehaviour
         {
             //No water collision, so set the raycast length to maxDist
             lineLength = maxDist;
-            if (isFillingWaterSource)
-            {
-                hittingWater.isFilling = false;
-                hittingWater = null;
-                isFillingWaterSource = false;   
-            }
             //If the water level is higher than the base height...
+            
         }
 
         //Set the raycast line color to blue to represent water
@@ -96,13 +92,19 @@ public class DrainPoint : MonoBehaviour
             {
                 waterFalling.Play();
             }
-            
         }
         else
         {
             Debug.Log("Called Stop");
             waterFalling.Stop();
             //waterFalling.Clear();
+            if (isFillingWaterSource)
+            {
+                Debug.Log("No more Water.");
+                hittingWater.isFilling = false;
+                hittingWater = null;
+                isFillingWaterSource = false;   
+            }
         }
 
     }
@@ -112,6 +114,13 @@ public class DrainPoint : MonoBehaviour
         line.SetPosition(0,transform.position);
         line.SetPosition(1,transform.position);
         waterFalling.Stop();
+         if (isFillingWaterSource)
+            {
+                Debug.Log("No more Water.");
+                hittingWater.isFilling = false;
+                hittingWater = null;
+                isFillingWaterSource = false;   
+            }
     }
 }
 
