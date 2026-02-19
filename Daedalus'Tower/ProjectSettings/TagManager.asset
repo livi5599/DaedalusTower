@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Water
   - Gem
+  - Hole
   layers:
   - Default
   - TransparentFX

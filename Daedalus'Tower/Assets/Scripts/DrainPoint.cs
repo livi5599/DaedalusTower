@@ -1,31 +1,30 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DrainPoint : MonoBehaviour
 {
     //Stores the object representing the water level
-    public GameObject WaterLevel;
     //How far ray travels
     public float maxDist = 10f;
     //Water fill speed
-    public float fillSpeed = 0.1f;
     //Water drain speed
-    public float drainSpeed = 0.1f;
     //Ray line length
     float lineLength;
     //Base/default height of water
-    public float waterBaseHeight; 
-    public float maxWaterHeight;
     public bool isFlowing = false;
+
+    public DrainPoint lastHole;
 
     public ParticleSystem waterFalling;
 
     [SerializeField] LineRenderer line;
+    public Water hittingWater;
+    public bool isFillingWaterSource = false;
 
     void Start()
     {
         waterFalling.Stop();
         //Set waterBaseHeight
-        waterBaseHeight = WaterLevel.transform.position.y;
         line = GetComponent<LineRenderer>();
     }
 
@@ -43,51 +42,76 @@ public class DrainPoint : MonoBehaviour
         line.SetPosition(0,transform.position);
         line.SetPosition(1,transform.position);
 
+        isFlowing = false;
+
+
         //Fire raycast
         if (Physics.Raycast(origin, direction, out hitInfo, maxDist)) //returns true if hit, false if miss
         {
+            Debug.Log("Hit " + hitInfo.transform.name);
             //Set the raycast line length
             lineLength = hitInfo.distance;
-            line.SetPosition(1,transform.position - Vector3.up*lineLength);
-
-            //If the ray collides with the "Water" object and the height of the object is not higher than 2.5...
-            if (hitInfo.collider.CompareTag("Water") && hitInfo.collider.transform.position.y <= maxWaterHeight)
+            line.SetPosition(1,hitInfo.point);
+            if (hitInfo.collider.CompareTag("Hole"))
             {
-                if(!isFlowing) {
-                    isFlowing = true;
-                    waterFalling.Play();
-                }
-                //Raise the "Water"
-                hitInfo.collider.transform.position += Vector3.up * fillSpeed * Time.deltaTime;
-                
-                
+                isFlowing = true;
+                lastHole = hitInfo.transform.GetComponentInChildren<DrainPoint>();
+                lastHole.enabled = true;
             }
-            else
+            else if (lastHole)
             {
-                waterFalling.Stop();
-                isFlowing = false;
-                //If the water level is higher than the base height...
-                if (WaterLevel.transform.position.y > waterBaseHeight)
-                {
-                    //Drain the water
-                    WaterLevel.transform.position -= Vector3.up * drainSpeed * Time.deltaTime;
-                }
-            }   
+                lastHole.enabled = false;
+                lastHole = null;
+            }
+            
+            
+            //If the ray collides with the "Water" object and the height of the object is not higher than 2.5...
+            if (hitInfo.collider.CompareTag("Water"))// && hitInfo.collider.transform.position.y <= maxWaterHeight)
+            {
+                isFlowing = true;
+                hittingWater.isFilling = true;
+                isFillingWaterSource = true;
+                //Raise the "Water"   
+            }
         }
         else
         {
             //No water collision, so set the raycast length to maxDist
             lineLength = maxDist;
-
-            //If the water level is higher than the base height...
-            if (WaterLevel.transform.position.y > waterBaseHeight)
+            if (isFillingWaterSource)
             {
-                //Drain the water
-                WaterLevel.transform.position -= Vector3.up * drainSpeed * Time.deltaTime;
+                hittingWater.isFilling = false;
+                hittingWater = null;
+                isFillingWaterSource = false;   
             }
+            //If the water level is higher than the base height...
         }
+
         //Set the raycast line color to blue to represent water
         Debug.DrawRay(origin, direction * lineLength, Color.blue);
+        if(isFlowing) 
+        {
+            Debug.Log("Called Play");
+            if (!waterFalling.isPlaying)
+            {
+                waterFalling.Play();
+            }
+            
+        }
+        else
+        {
+            Debug.Log("Called Stop");
+            waterFalling.Stop();
+            //waterFalling.Clear();
+        }
+
+    }
+
+    void OnDisable()
+    {
+        line.SetPosition(0,transform.position);
+        line.SetPosition(1,transform.position);
+        waterFalling.Stop();
     }
 }
 
