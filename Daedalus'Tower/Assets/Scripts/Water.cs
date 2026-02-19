@@ -13,7 +13,6 @@ public class Water : MonoBehaviour
     void Start()
     {
         waterBaseHeight = transform.position.y;
-        maxWaterHeight = waterBaseHeight + 5;
     }
 
     // Update is called once per frame
