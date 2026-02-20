@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Water : MonoBehaviour
 {
-
-    public float maxWaterHeight;
-    public float waterBaseHeight;
+    public float waterHeightOffset = 1;
+    private float maxWaterHeight;
+    private float waterBaseHeight;
     public bool isFilling = false; 
     public float drainSpeed = 0.1f;
     
@@ -13,6 +13,7 @@ public class Water : MonoBehaviour
     void Start()
     {
         waterBaseHeight = transform.position.y;
+        maxWaterHeight = waterBaseHeight + waterHeightOffset;
     }
 
     // Update is called once per frame

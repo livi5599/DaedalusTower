@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4814823640136844048}
   m_Layer: 0
   m_Name: Water
-  m_TagString: Untagged
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -125,8 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf28aa485e7d31244bb1f852a6d1b907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Water
-  maxWaterHeight: 0
-  waterBaseHeight: 0
+  waterHeightOffset: 1
   isFilling: 0
   drainSpeed: 0.1
   fillSpeed: 0.1
