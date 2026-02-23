@@ -1,4 +1,6 @@
+using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 public class EConductor : MonoBehaviour
 {
@@ -6,6 +8,8 @@ public class EConductor : MonoBehaviour
     public float maxDist = 10f;
     //Tracks if the gem is active
     public bool isActive = false;
+    //Tracks if non-reflective object is active
+    Activate active;
 
     //Toggles to turn different gem faces on/off
     [SerializeField] public bool FFActive;
@@ -141,6 +145,10 @@ public class EConductor : MonoBehaviour
                                 hitGem.incomingHitPoint = hitInfo.point;
                             }
                         }
+                        else if (hitInfo.collider.CompareTag("Conductor"))
+                        {
+                            activate(hitInfo);
+                        }
                     }
                     else //Ray hit nothing
                     {
@@ -153,6 +161,18 @@ public class EConductor : MonoBehaviour
             {
                 nodeLine.enabled = false;
             }
+        }
+    }
+
+    void activate(RaycastHit hitInfo)
+    {
+        //get Activate script on object that was hit
+        Activate target = hitInfo.collider.GetComponent<Activate>();
+
+        if (target != null) //if the target is valid...
+        {
+            //power on the object
+            target.PowerOn();
         }
     }
 }

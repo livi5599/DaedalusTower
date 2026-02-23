@@ -12,6 +12,8 @@ public class DrainPoint : MonoBehaviour
     float lineLength;
     //Base/default height of water
     public bool isFlowing = false;
+    //Tracks water in minimap
+    public LineRenderer mmWater;
 
     public DrainPoint lastHole;
 
