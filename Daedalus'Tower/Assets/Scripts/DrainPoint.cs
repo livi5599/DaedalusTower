@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -12,14 +13,13 @@ public class DrainPoint : MonoBehaviour
     float lineLength;
     //Base/default height of water
     public bool isFlowing = false;
-    //Tracks water in minimap
-    public LineRenderer mmWater;
-
     public DrainPoint lastHole;
 
     public ParticleSystem waterFalling;
 
     [SerializeField] LineRenderer line;
+    //Tracks water in minimap
+    [SerializeField] LineRenderer mmWater;
     public Water hittingWater;
     public bool isFillingWaterSource = false;
 
@@ -27,10 +27,10 @@ public class DrainPoint : MonoBehaviour
     {
         waterFalling.Stop();
         //Set waterBaseHeight
-        line = GetComponent<LineRenderer>();
+        //line = GetComponent<LineRenderer>();
 
-        //Get line renderer on object used for tracking water in mini map
-        mmWater = GetComponentInChildren<LineRenderer>();
+        //Will track minimap water ray
+        //mmWater = GetComponentInChildren<LineRenderer>();
 
         //Alerts if error with finding all mmWater objects
         if (mmWater ==  null)
@@ -53,6 +53,10 @@ public class DrainPoint : MonoBehaviour
         line.SetPosition(0,transform.position);
         line.SetPosition(1,transform.position);
 
+        //Sets start and end position for minimap water
+        mmWater.SetPosition(0, transform.position);
+        mmWater.SetPosition(1, transform.position);
+
         isFlowing = false;
 
 
@@ -63,6 +67,10 @@ public class DrainPoint : MonoBehaviour
             //Set the raycast line length
             lineLength = hitInfo.distance;
             line.SetPosition(1,hitInfo.point);
+            //Sets the minimap raycast line end point
+            mmWater.SetPosition(1, hitInfo.point);
+
+            Debug.Log("mmWater end position: " + hitInfo.point);
             if (hitInfo.collider.CompareTag("Hole"))
             {
                 isFlowing = true;
@@ -122,8 +130,18 @@ public class DrainPoint : MonoBehaviour
 
     void OnDisable()
     {
-        line.SetPosition(0,transform.position);
-        line.SetPosition(1,transform.position);
+        //Only sets positions if variables are valid
+        if (line != null)
+        {
+            line.SetPosition(0,transform.position);
+            line.SetPosition(1,transform.position);
+        }
+        if (mmWater != null)
+        {
+            mmWater.SetPosition(0,transform.position);
+            mmWater.SetPosition(1,transform.position);
+        }
+
         waterFalling.Stop();
          if (isFillingWaterSource)
             {
