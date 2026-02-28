@@ -28,6 +28,15 @@ public class DrainPoint : MonoBehaviour
         waterFalling.Stop();
         //Set waterBaseHeight
         line = GetComponent<LineRenderer>();
+
+        //Get line renderer on object used for tracking water in mini map
+        mmWater = GetComponentInChildren<LineRenderer>();
+
+        //Alerts if error with finding all mmWater objects
+        if (mmWater ==  null)
+        {
+            Debug.LogError($"Missing mini map water line on {gameObject.name}!");
+        }
     }
 
     void Update()
