@@ -6,36 +6,35 @@ public class DrainPoint : MonoBehaviour
     //Stores the object representing the water level
     //How far ray travels
     public float maxDist = 10f;
-    //Water fill speed
-    //Water drain speed
     //Ray line length
     float lineLength;
     //Base/default height of water
     public bool isFlowing = false;
-    //Tracks water in minimap
-    public LineRenderer mmWater;
 
     public DrainPoint lastHole;
 
     public ParticleSystem waterFalling;
 
     [SerializeField] LineRenderer line;
+    //tracks water in minimap
+    [SerializeField] LineRenderer mmWater;
     public Water hittingWater;
     public bool isFillingWaterSource = false;
 
     void Start()
     {
         waterFalling.Stop();
-        //Set waterBaseHeight
         line = GetComponent<LineRenderer>();
 
-        //Get line renderer on object used for tracking water in mini map
-        mmWater = GetComponentInChildren<LineRenderer>();
-
-        //Alerts if error with finding all mmWater objects
+        //Only search for mmWater if not already assigned in Inspector
         if (mmWater ==  null)
         {
-            Debug.LogError($"Missing mini map water line on {gameObject.name}!");
+            //Looks for child named "mmWater" to prevent grabbing the "line" line renderer
+            Transform child = transform.Find("mmWater");
+            if (child != null)
+            {
+                mmWater = child.GetComponent<LineRenderer>();
+            }
         }
     }
 
@@ -53,8 +52,11 @@ public class DrainPoint : MonoBehaviour
         line.SetPosition(0,transform.position);
         line.SetPosition(1,transform.position);
 
-        isFlowing = false;
+        //Naive minimap water line renderer positioning
+        mmWater.SetPosition(0,transform.position);
+        mmWater.SetPosition(1,transform.position);
 
+        isFlowing = false;
 
         //Fire raycast
         if (Physics.Raycast(origin, direction, out hitInfo, maxDist)) //returns true if hit, false if miss
@@ -63,6 +65,10 @@ public class DrainPoint : MonoBehaviour
             //Set the raycast line length
             lineLength = hitInfo.distance;
             line.SetPosition(1,hitInfo.point);
+
+            //Set the minimap water end point
+            mmWater.SetPosition(1, hitInfo.point);
+        
             if (hitInfo.collider.CompareTag("Hole"))
             {
                 isFlowing = true;
@@ -124,6 +130,10 @@ public class DrainPoint : MonoBehaviour
     {
         line.SetPosition(0,transform.position);
         line.SetPosition(1,transform.position);
+
+        mmWater.SetPosition(0,transform.position);
+        mmWater.SetPosition(1,transform.position);
+
         waterFalling.Stop();
          if (isFillingWaterSource)
             {
