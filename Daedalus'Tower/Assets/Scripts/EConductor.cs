@@ -52,8 +52,21 @@ public class EConductor : MonoBehaviour
                 //Get the line for the node
                 LineRenderer nodeLine = node.GetComponent<LineRenderer>();
 
-                //If the node line is enabled, disable it to prevent it from being enabled when not active
-                if (node != null) nodeLine.enabled = false;
+                //Get the line for the node to be tracked in the minimap (set to null to prevent LineRenderer from overriding)
+                LineRenderer mmReflectedBeam = null;
+                Transform child = node.Find("mmBeam");
+                //This check ensures mmReflectedBeam gets its own line renderer, not the same renderer as nodeLine
+                if (child != null)
+                {
+                    mmReflectedBeam = child.GetComponent<LineRenderer>();
+                }
+
+                //If the node line is enabled, disable it and mmReflectedBeam to prevent it from being enabled when not active
+                if (node != null)
+                {
+                    nodeLine.enabled = false;
+                    mmReflectedBeam.enabled = false;
+                }
             }
         }
 
@@ -99,10 +112,23 @@ public class EConductor : MonoBehaviour
             //Gets the raycast line for each reflecting node
             LineRenderer nodeLine = node.GetComponent<LineRenderer>();
 
+            //Get the line for the node to be tracked in the minimap (set to null to prevent LineRenderer from overriding)
+            LineRenderer mmReflectedBeam = null;
+            Transform child = node.Find("mmBeam");
+            //This check ensures mmReflectedBeam gets its own line renderer, not the same renderer as nodeLine
+            if (child != null)
+            {
+                Debug.LogError("Gem " + gameObject.name + " could not find mmBeam on node " + node.name);
+                mmReflectedBeam = child.GetComponent<LineRenderer>();
+            }
+
             if (node != hitNode) //If the node is not the node that was hit...
             {
                 //ensures rays aren't fired when faces aren't active
                 nodeLine.enabled = false;
+
+                //Guard to prevent crashing
+                if (mmReflectedBeam != null) mmReflectedBeam.enabled = false;
 
                 //checks if the current node is a node set to active
                 if ((node == nodes[0] && FFActive) || (node == nodes[1] && BFActive) || (node == nodes[2] && RFActive) || (node == nodes[3] && LFActive))
@@ -114,7 +140,10 @@ public class EConductor : MonoBehaviour
                 if (fire) //if the ray should be fired...
                 {
                     //Enable the node line
-                    if (node != null && fire) nodeLine.enabled = true;
+                    if (node != null && fire){
+                        nodeLine.enabled = true;
+                        if (mmReflectedBeam != null) mmReflectedBeam.enabled = true;
+                    }
 
                     //Get the origin from where the ray will be reflected
                     Vector3 origin = node.position;
@@ -133,6 +162,13 @@ public class EConductor : MonoBehaviour
                         nodeLine.SetPosition(0, origin);
                         //End of line
                         nodeLine.SetPosition(1, hitInfo.point);
+
+                        //Start and end of reflected minimap line
+                        if (mmReflectedBeam != null)
+                        {
+                            mmReflectedBeam.SetPosition(0, origin);
+                            mmReflectedBeam.SetPosition(1, hitInfo.point);
+                        }
 
                         if (hitInfo.collider.CompareTag("Gem")) //If the ray hit a gem...
                         {
@@ -154,12 +190,15 @@ public class EConductor : MonoBehaviour
                     {
                         nodeLine.SetPosition(0, origin);
                         nodeLine.SetPosition(1, origin + (direction * maxDist));
+                        mmReflectedBeam.SetPosition(0, origin);
+                        mmReflectedBeam.SetPosition(1, origin + (direction * maxDist));
                     }
                 } 
             }
             else //the node is the hit node
             {
                 nodeLine.enabled = false;
+                mmReflectedBeam.enabled = false;
             }
         }
     }
