@@ -9,6 +9,8 @@ public class Interactor : MonoBehaviour
     [SerializeField] private LayerMask interactMask = ~0;
     [SerializeField] private KeyCode interactKey = KeyCode.E;
 
+
+
     private IInteractable current;
 
     void Update()
