@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class DoorwayController : MonoBehaviour
 {
+    [SerializeField] GameObject doorwayShimmer;
+    [SerializeField] bool doorwayOn;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -16,6 +18,14 @@ public class DoorwayController : MonoBehaviour
 
     public void SomePublicMethod(float oneArgument)
     {
-        print("Someone told me that " + oneArgument.ToString());
+        if (!doorwayOn)
+        {
+            doorwayShimmer.SetActive(true);   
+        }
+        else
+        {
+            doorwayShimmer.SetActive(false);
+        }
+        doorwayOn = !doorwayOn;
     }
 }

@@ -16,6 +16,7 @@ public class EConductor : MonoBehaviour
     [SerializeField] public bool BFActive;
     [SerializeField] public bool RFActive;
     [SerializeField] public bool LFActive;
+    public GameObject lastHit;
 
     //Stores the point where the ray hit the gem
     public Vector3 incomingHitPoint;
@@ -205,13 +206,19 @@ public class EConductor : MonoBehaviour
 
     void activate(RaycastHit hitInfo)
     {
-        //get Activate script on object that was hit
-        Activate target = hitInfo.collider.GetComponent<Activate>();
 
-        if (target != null) //if the target is valid...
+        if (hitInfo.collider.gameObject != lastHit)
         {
-            //power on the object
-            target.PowerOn();
+            lastHit = hitInfo.collider.gameObject;
+            //get Activate script on object that was hit
+            Activate target = hitInfo.collider.GetComponent<Activate>();
+
+
+            if (target != null) //if the target is valid...
+            {   
+                //power on the object
+                target.PowerOn();
+            }   
         }
     }
 }
