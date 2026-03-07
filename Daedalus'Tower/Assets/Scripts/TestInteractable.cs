@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class TestInteractable : MonoBehaviour, IInteractable
+public class TestInteractable : MonoBehaviour
 {
-    public string Prompt => "Interact";
     [SerializeField] GameObject[] waterLevels;
-    public void Interact(GameObject interactor)
+    public string prompt = "Go UP";
+    public void Interact()
     {
         for (int i = 0; i < waterLevels.Length; i++)
         {

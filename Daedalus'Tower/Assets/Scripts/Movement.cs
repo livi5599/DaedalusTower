@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SecurityMovement : MonoBehaviour
+public class Movement : MonoBehaviour
 {
     public float sensX;
     public float sensY;
@@ -22,6 +22,8 @@ public class SecurityMovement : MonoBehaviour
     public bool canMove = true;
     [SerializeField] int hidingSpeed = 30;
 
+    public int currentFloor = 2;
+
     
     void Awake()
     {
@@ -29,6 +31,7 @@ public class SecurityMovement : MonoBehaviour
     }
     void Start()
     {
+        currentFloor = 2;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         cameraTransform.transform.localRotation = Quaternion.Euler(90, 0, 0);
@@ -52,10 +55,16 @@ public class SecurityMovement : MonoBehaviour
             isAccelerating = true;
         }
         else { isAccelerating = false; }
-
-
         
     }
+    void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.tag == "Floor")
+        {
+            currentFloor = collider.gameObject.GetComponent<WhatFloorAmI>().myFloor;
+        }
+    }
+
 
     void FixedUpdate()
     {

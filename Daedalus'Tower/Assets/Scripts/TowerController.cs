@@ -3,26 +3,50 @@ using System.Collections;
 
 public class TowerController : MonoBehaviour
 {
+    [SerializeField] GameObject player;
+    [SerializeField] Movement playerMovement;
+    [SerializeField] Animator cameraAnimatior;
+
+    private int playerFloor;
     public GameObject[] towerSections;
-    private bool[] sectionIsRotating;
+    public ParticleSystem[] dustSystems;
+    public bool sectionIsRotating;
     private int sectionIndex = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        sectionIsRotating = new bool[towerSections.Length];
+        playerFloor = playerMovement.GetComponent<Movement>().currentFloor;
+        for(int i = 0; i < dustSystems.Length; i++)
+        {
+            dustSystems[i].Stop();
+        }
+       
     }
-
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && !sectionIsRotating[sectionIndex])
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && !sectionIsRotating)
         {
+            playerFloor = playerMovement.GetComponent<Movement>().currentFloor;
+            if(playerFloor == sectionIndex)
+            {
+                cameraAnimatior.SetTrigger("Shake");
+                playerMovement.GetComponent<Movement>().canMove = false;
+                player.transform.SetParent(towerSections[sectionIndex].transform);
+            }
             StartCoroutine(RotateLeft(towerSections[sectionIndex], 90f, 2f, sectionIndex));
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow) && !sectionIsRotating[sectionIndex])
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && !sectionIsRotating)
         {
+            playerFloor = playerMovement.GetComponent<Movement>().currentFloor;
+            if(playerFloor == sectionIndex)
+            {
+                cameraAnimatior.SetTrigger("Shake");
+                playerMovement.GetComponent<Movement>().canMove = false;
+                player.transform.SetParent(towerSections[sectionIndex].transform);
+            }
             StartCoroutine(RotateRight(towerSections[sectionIndex], 90f, 2f, sectionIndex));
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -51,12 +75,15 @@ public class TowerController : MonoBehaviour
 
     IEnumerator RotateLeft(GameObject towerSection, float angle, float duration, int localIndex)
     {
+    
+        dustSystems[sectionIndex].Play();
+        Debug.Log("Playing Particle: " + sectionIndex);
         float timeElapsed = 0;
         Quaternion currentRotation = towerSection.transform.rotation;
         Quaternion rotationDelta = Quaternion.Euler(0, angle, 0);
         Quaternion endRotation = currentRotation * rotationDelta;
 
-        sectionIsRotating[localIndex] = true;
+        sectionIsRotating = true;
 
         while (timeElapsed < duration)
         {
@@ -71,17 +98,21 @@ public class TowerController : MonoBehaviour
         }
 
         towerSection.transform.rotation = endRotation;
-        sectionIsRotating[localIndex] = false;
+        sectionIsRotating = false;
+        dustSystems[sectionIndex].Stop();
+        player.transform.parent = null;
+        playerMovement.GetComponent<Movement>().canMove = true;
     }
     
     IEnumerator RotateRight(GameObject towerSection, float angle, float duration, int localIndex)
     {
+        dustSystems[sectionIndex].Play();
         float timeElapsed = 0;
         Quaternion currentRotation = towerSection.transform.rotation;
         Quaternion rotationDelta = Quaternion.Euler(0, -angle, 0);
         Quaternion endRotation = currentRotation * rotationDelta;
 
-        sectionIsRotating[localIndex] = true;
+        sectionIsRotating = true;
 
         while (timeElapsed < duration)
         {
@@ -96,6 +127,9 @@ public class TowerController : MonoBehaviour
         }
 
         towerSection.transform.rotation = endRotation;
-        sectionIsRotating[localIndex] = false;
+        sectionIsRotating = false;
+        dustSystems[sectionIndex].Stop();
+        player.transform.parent = null;
+        playerMovement.GetComponent<Movement>().canMove = true;
     }
 }

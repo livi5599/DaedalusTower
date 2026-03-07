@@ -23,7 +23,7 @@ public class EConductor : MonoBehaviour
     //Stores the possible hit points/nodes of the gem
     public Transform[] nodes;
     //Used to store the renderer attached to this gem
-    Renderer renderer;
+    public Renderer renderer;
 
     void Start()
     {
