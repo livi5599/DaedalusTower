@@ -18,7 +18,6 @@ public class EConductor : MonoBehaviour
     [SerializeField] public bool BFActive;
     [SerializeField] public bool RFActive;
     [SerializeField] public bool LFActive;
-    public GameObject lastHit;
 
     //Stores the point where the ray hit the gem
     public Vector3 incomingHitPoint;
@@ -39,6 +38,8 @@ public class EConductor : MonoBehaviour
         //one-time search
         foreach (Transform node in nodes)
         {
+            //If the node has already been processed, skip
+            if (worldLines.ContainsKey(node)) continue;
             //Store world node line
             worldLines.Add(node, node.GetComponent<LineRenderer>());
 
@@ -57,7 +58,12 @@ public class EConductor : MonoBehaviour
                     break;
                 }
             }
-            mmLines.Add(node, mmBeam);
+            //if mmLines doesn't contain the node...
+            if (!mmLines.ContainsKey(node))
+            {
+                //add the node to mmLines
+                mmLines.Add(node, mmBeam);
+            }
         }
     }
 
@@ -219,19 +225,13 @@ public class EConductor : MonoBehaviour
 
     void activate(RaycastHit hitInfo)
     {
+        //get Activate script on object that was hit
+        Activate target = hitInfo.collider.GetComponent<Activate>();
 
-        if (hitInfo.collider.gameObject != lastHit)
+        if (target != null) //if the target is valid...
         {
-            lastHit = hitInfo.collider.gameObject;
-            //get Activate script on object that was hit
-            Activate target = hitInfo.collider.GetComponent<Activate>();
-
-
-            if (target != null) //if the target is valid...
-            {   
-                //power on the object
-                target.PowerOn();
-            }   
-        }
+            //Increment the beam count on the object   
+            target.beamCount++;
+        }   
     }
 }
