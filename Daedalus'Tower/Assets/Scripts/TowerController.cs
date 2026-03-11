@@ -12,6 +12,8 @@ public class TowerController : MonoBehaviour
     public ParticleSystem[] dustSystems;
     public bool sectionIsRotating;
     private int sectionIndex = 0;
+    //Minimap arrow
+    public Transform arrow;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
