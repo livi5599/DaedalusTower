@@ -23,6 +23,9 @@ public class TowerController : MonoBehaviour
         {
             dustSystems[i].Stop();
         }
+
+        //Default minimap arrow position
+        arrow.position = new Vector3(-19f, 3f, -21f);
        
     }
 
@@ -73,6 +76,21 @@ public class TowerController : MonoBehaviour
                 Debug.Log("sectionIndex > 2, so sectionIndex = " + sectionIndex);
             }
         }
+
+        //Moves arrow so it points at selected tower level
+        if (sectionIndex == 1)
+        {
+            arrow.position = new Vector3(-20f, -9.5f, -21f);
+        }
+        else if (sectionIndex == 2)
+        {
+            arrow.position = new Vector3(-20.3f, -24f, -21f);
+        }
+        else //arrow must be pointing at top level
+        {
+            arrow.position = new Vector3(-19f, 3f, -21f);
+        }
+
     }
 
     IEnumerator RotateLeft(GameObject towerSection, float angle, float duration, int localIndex)
